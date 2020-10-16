@@ -75,7 +75,7 @@
 			</div>
 		</div>
 		<div class="confirm-wrapper">
-			<button class="confirm-but">Купить</button>
+			<button class="confirm-but" @click="purchase">Купить</button>
 		</div>
 	</div>
 </template>
@@ -105,6 +105,9 @@ export default {
 		}
 	},
 	methods: {
+		purchase() {
+			this.basket = [];
+		},
 		async removeUnsub() {
 			this.$cookies.set('unsubGroup', JSON.stringify([]));
 			this.recommendedList = (await this.$axios.post('http://localhost:3030/collab', {'basket': this.basket, 'groups':JSON.parse(this.$cookies.get('unsubGroup'))})).data;
