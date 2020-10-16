@@ -69,11 +69,10 @@
 						Ароматизация: {{rec.arom}}
 						<br>
 					</div>
-					<button>Не интересует</button>
+					<button v-on:click="unsub(rec)">Не интересует</button>
 				</div>
 			</div>
 		</div>
-	
 		<div class="confirm-wrapper">
 			<button class="confirm-but">Купить</button>
 		</div>
@@ -89,7 +88,7 @@ export default {
 			teaTree: {data: { children: null}},
 			category: 'Пуэр',
 			basket: [],
-			recommendedList: []
+			recommendedList: [],
 		}
 	},
 	created() {
@@ -105,9 +104,20 @@ export default {
 		}
 	},
 	methods: {
+		unsub(rec) {
+			let cookies = this.$cookies.get('unsubGroup');
+			let arr = [];
+
+			if (cookies != null) {
+				arr = JSON.parse(cookies);
+			}
+			arr.push(rec.group);
+
+			this.$cookies.set('unsubGroup', JSON.stringify(arr));
+		},
 		async choose(name) {
 			this.basket.push(name);
-			this.recommendedList = (await this.$axios.post('http://localhost:3030/collab', {'basket': this.basket})).data;
+			this.recommendedList = (await this.$axios.post('http://localhost:3030/collab', {'basket': this.basket, 'groups': this.$cookies.get('unsubGroup') })).data;
 		},
 		selectGroup(name) {
 			this.category = name

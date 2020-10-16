@@ -6,6 +6,7 @@ import TreeView from "vue-json-tree-view";
 Vue.config.productionTip = false;
 Vue.prototype.$axios = axios;
 Vue.use(TreeView);
+Vue.use(require('vue-cookies'))
 
 new Vue({
   render: h => h(App),
