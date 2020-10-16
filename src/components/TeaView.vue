@@ -1,5 +1,6 @@
 <template>
 	<div class="tea-main">
+		<button @click="removeUnsub">Сбросить отписки</button>
 		<div class="tea-header">
 			<div class="recommended-mode-select" v-if="false">
 				<input type="radio" id="one" value="collab" v-model="pickedMode">
@@ -104,20 +105,27 @@ export default {
 		}
 	},
 	methods: {
-		unsub(rec) {
+		async removeUnsub() {
+			this.$cookies.set('unsubGroup', JSON.stringify([]));
+			this.recommendedList = (await this.$axios.post('http://localhost:3030/collab', {'basket': this.basket, 'groups':JSON.parse(this.$cookies.get('unsubGroup'))})).data;
+		},
+		async unsub(rec) {
 			let cookies = this.$cookies.get('unsubGroup');
 			let arr = [];
 
 			if (cookies != null) {
 				arr = JSON.parse(cookies);
 			}
-			arr.push(rec.group);
 
+			arr.push(rec.group);
+			arr = [...(new Set(arr))];
 			this.$cookies.set('unsubGroup', JSON.stringify(arr));
+
+			this.recommendedList = (await this.$axios.post('http://localhost:3030/collab', {'basket': this.basket, 'groups':JSON.parse(this.$cookies.get('unsubGroup'))})).data;
 		},
 		async choose(name) {
 			this.basket.push(name);
-			this.recommendedList = (await this.$axios.post('http://localhost:3030/collab', {'basket': this.basket, 'groups': this.$cookies.get('unsubGroup') })).data;
+			this.recommendedList = (await this.$axios.post('http://localhost:3030/collab', {'basket': this.basket, 'groups':JSON.parse(this.$cookies.get('unsubGroup'))})).data;
 		},
 		selectGroup(name) {
 			this.category = name
