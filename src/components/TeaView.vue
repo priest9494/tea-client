@@ -1,6 +1,17 @@
 <template>
 	<div class="tea-main">
 		<button @click="removeUnsub">Сбросить отписки</button>
+
+		<br>
+		<input type="radio" id="one" value="collab" v-model="selectedRecommendType" @click="changeRecommend(val)">
+		<label for="one">Коллаборативная</label>
+		<br>
+		<input type="radio" id="two" value="content" v-model="selectedRecommendType" @click="changeRecommend(val)">
+		<label for="two">Контент ориентированная</label>
+		<br>
+		<input type="radio" id="two" value="params" v-model="selectedRecommendType" @click="changeRecommend(val)">
+		<label for="two">Параметрический запрос</label>
+
 		<div class="tea-header">
 			<div class="recommended-mode-select" v-if="false">
 				<input type="radio" id="one" value="collab" v-model="pickedMode">
@@ -81,7 +92,6 @@
 </template>
 
 <script>
-
 export default {
 	data() {
 		return {
@@ -90,6 +100,7 @@ export default {
 			category: 'Пуэр',
 			basket: [],
 			recommendedList: [],
+			selectedRecommendType: 'collab'
 		}
 	},
 	created() {
@@ -105,36 +116,48 @@ export default {
 		}
 	},
 	methods: {
+		changeRecommend(val) {
+			this.selectedRecommendType = val;
+		},
 		purchase() {
 			this.basket = [];
 		},
 		async removeUnsub() {
-			this.$cookies.set('unsubGroup', JSON.stringify([]));
-			this.recommendedList = (await this.$axios.post('http://localhost:3030/collab', {'basket': this.basket, 'groups':JSON.parse(this.$cookies.get('unsubGroup'))})).data;
+			this.$cookies.set('avoidList', JSON.stringify([]));
+			this.getRecommends();
 		},
 		async unsub(rec) {
-			let cookies = this.$cookies.get('unsubGroup');
+			let cookies = this.$cookies.get('avoidList');
 			let arr = [];
 
 			if (cookies != null) {
 				arr = JSON.parse(cookies);
 			}
 
-			arr.push(rec.group);
+			arr.push(rec.name);
 			arr = [...(new Set(arr))];
-			this.$cookies.set('unsubGroup', JSON.stringify(arr));
+			this.$cookies.set('avoidList', JSON.stringify(arr));
 
-			this.recommendedList = (await this.$axios.post('http://localhost:3030/collab', {'basket': this.basket, 'groups':JSON.parse(this.$cookies.get('unsubGroup'))})).data;
+			this.getRecommends();
 		},
 		async choose(name) {
 			this.basket.push(name);
-			this.recommendedList = (await this.$axios.post('http://localhost:3030/collab', {'basket': this.basket, 'groups':JSON.parse(this.$cookies.get('unsubGroup'))})).data;
+			this.getRecommends();
 		},
 		selectGroup(name) {
-			this.category = name
+			this.category = name;
 		},
 		async getTree() {
 			this.teaTree = await this.$axios.get('http://localhost:3030/teaTree');
+		},
+		async getRecommends() {
+			if(this.selectedRecommendType === 'collab') {
+				this.recommendedList = (await this.$axios.post('http://localhost:3030/collab', {'basket': this.basket, 'avoidList':JSON.parse(this.$cookies.get('avoidList'))})).data;
+			} else if (this.selectedRecommendType === 'content') {
+				console.log('content');
+			} else if (this.selectedRecommendType === 'params'){
+				console.log('params');
+			}
 		}
 	}
 }
