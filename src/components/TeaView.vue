@@ -118,6 +118,7 @@ export default {
 	methods: {
 		changeRecommend(val) {
 			this.selectedRecommendType = val;
+			this.getRecommends();
 		},
 		purchase() {
 			this.basket = [];
@@ -154,7 +155,7 @@ export default {
 			if(this.selectedRecommendType === 'collab') {
 				this.recommendedList = (await this.$axios.post('http://localhost:3030/collab', {'basket': this.basket, 'avoidList':JSON.parse(this.$cookies.get('avoidList'))})).data;
 			} else if (this.selectedRecommendType === 'content') {
-				console.log('content');
+				this.recommendedList = (await this.$axios.post('http://localhost:3030/content', {'basket': this.basket, 'avoidList':JSON.parse(this.$cookies.get('avoidList'))})).data;
 			} else if (this.selectedRecommendType === 'params'){
 				console.log('params');
 			}
