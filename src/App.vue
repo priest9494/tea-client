@@ -5,7 +5,7 @@
 </template>
 
 <script>
-import TeaView from './components/TeaView'
+import TeaView from './components/Tea'
 
 export default {
   name: 'App',

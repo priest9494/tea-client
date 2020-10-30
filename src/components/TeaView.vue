@@ -22,7 +22,20 @@
 				<label for="two">Параметрический запрос</label>
 			</div>
 		</div>
-
+		<div class="search-params">
+			Цена
+			<br>
+			<vue-slider v-model="priceRange" :min="100" :max="1900" @change="getRecommends"/>
+			Вес упаковки
+			<br>
+			<vue-slider v-model="weightRange" :min="10" :max="130" @change="getRecommends"/>
+			Размер листа
+			<br>
+			<vue-slider v-model="leafRange" :min="1" :max="3" @change="getRecommends"/>
+			<br>
+			Неточный вывод
+			<input type="checkbox" v-model="inaccurate">
+		</div>
 		<div class="tea-body">
 			<div class="categories-wrapper">
 				Категории:
@@ -92,15 +105,25 @@
 </template>
 
 <script>
+import VueSlider from 'vue-slider-component'
+import 'vue-slider-component/theme/antd.css'
+
 export default {
+	components: {
+		VueSlider 
+	},
 	data() {
 		return {
 			pickedMode: 'collab',
-			teaTree: {data: { children: null}},
+			teaTree: { data: { children: null }},
+			inaccurate: true,
 			category: 'Пуэр',
 			basket: [],
 			recommendedList: [],
-			selectedRecommendType: 'collab'
+			selectedRecommendType: 'collab',
+			priceRange: [300, 1500],
+			weightRange: [20, 80],
+			leafRange: [1, 3]
 		}
 	},
 	created() {
@@ -147,6 +170,7 @@ export default {
 		},
 		selectGroup(name) {
 			this.category = name;
+			this.getRecommends();
 		},
 		async getTree() {
 			this.teaTree = await this.$axios.get('http://localhost:3030/teaTree');
@@ -157,7 +181,12 @@ export default {
 			} else if (this.selectedRecommendType === 'content') {
 				this.recommendedList = (await this.$axios.post('http://localhost:3030/content', {'basket': this.basket, 'avoidList':JSON.parse(this.$cookies.get('avoidList'))})).data;
 			} else if (this.selectedRecommendType === 'params'){
-				console.log('params');
+				this.recommendedList = (await this.$axios.post('http://localhost:3030/params', {
+					'color': this.category,
+					'priceRange': this.priceRange, 
+					'weightRange': this.weightRange, 
+					'leafRange': this.leafRange, 
+					'inaccurate': this.inaccurate})).data;
 			}
 		}
 	}
@@ -185,6 +214,12 @@ export default {
 .tea-list{
 	width: 80vw;
 	margin-left: 10%;
+}
+
+
+.search-params {
+	width: 60%;
+	margin-left: 20%;
 }
 
 .categories-wrapper {
