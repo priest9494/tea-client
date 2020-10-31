@@ -37,7 +37,8 @@
                     <vue-slider v-model="leafRange" :min="1" :max="3" @change="getTeaList"/>
                     <br>
                     Неточный вывод
-                    <input type="checkbox" v-model="inaccurate">
+                    <input type="checkbox" v-model="inaccurate" @change="getTeaList">
+					<button @click="removeUnsub">Сбросить отписки</button>
                 </div>
             </div>
         </div>
@@ -57,6 +58,28 @@
 				Размер листа: {{tea.leafSize}}
 				<br>
 				Ароматизация: {{tea.arom}}
+			</div>
+		</div>
+
+		<div class="recommends">
+			<div class="recommends-header">
+				Вам также может понравиться
+			</div>
+			<div class="recommends-body">
+				<div class="recommend-item" v-for="rec in recommendedList" :key="rec" >
+					<div @click="choose(rec.name)">
+						Название: {{ rec.name }}
+						<br>
+						Цена: {{rec.price}}
+						<br>
+						Вес упаковки: {{rec.weight}}
+						<br>
+						Размер листа: {{rec.leafSize}}
+						<br>
+						Ароматизация: {{rec.arom}}
+					</div>
+					<button class="unsub-but" v-on:click="unsub(rec)">Не интересует</button>
+				</div>
 			</div>
 		</div>
     </div>
@@ -137,11 +160,7 @@ export default {
 			this.teaTree = await this.$axios.get('http://localhost:3030/teaTree');
 		},
 		async getRecommends() {
-			if(this.selectedRecommendType === 'collab') {
-				this.recommendedList = (await this.$axios.post('http://localhost:3030/collab', {'basket': this.basket, 'avoidList':JSON.parse(this.$cookies.get('avoidList'))})).data;
-			} else if (this.selectedRecommendType === 'content') {
-				this.recommendedList = (await this.$axios.post('http://localhost:3030/content', {'basket': this.basket, 'avoidList':JSON.parse(this.$cookies.get('avoidList'))})).data;
-			}
+			this.recommendedList = (await this.$axios.post('http://localhost:3030/recommend', {'basket': this.basket, 'avoidList':JSON.parse(this.$cookies.get('avoidList'))})).data;
 		},
 		async getTeaList() {
 			this.teaList = (await this.$axios.post('http://localhost:3030/params', {
@@ -212,23 +231,40 @@ export default {
     text-decoration: underline;
 }
 
-.tea-body {
+.tea-body, .recommends-body {
 	display: flex;
 	flex-direction: row;
 	flex-wrap: wrap;
 	width: 80vw;
-	margin: 0 10%;
+	margin: 15px 10% 0 10%;
 }
 
-.tea-item {
+.tea-item, .recommend-item {
 	padding: 25px;
 	margin: 15px;
 	border: 1px solid black;
 	cursor: pointer;
 }
 
-.tea-item:hover {
+.tea-item:hover, .recommend-item:hover {
 	background: rgb(226, 255, 234);
+}
+
+.recommends {
+	margin-top: 30px;
+}
+
+.recommends-header {
+	font-size: 30px;
+	text-align: center;
+}
+
+.basket {
+	margin: 30px 0 0 10px;
+}
+
+.unsub-but {
+	z-index: 3;
 }
 
 </style>
